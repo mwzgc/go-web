@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"go-web/src/db"
 	"go-web/src/godis"
 	"go-web/src/utils"
 
@@ -65,6 +66,10 @@ func main() {
 			panic(err)
 		}
 		ctx.JSON(u)
+	})
+
+	app.Get("/getDbData", func(ctx iris.Context) {
+		ctx.JSON(db.QueryMulti())
 	})
 
 	app.Run(iris.Addr(":8000"), iris.WithoutServerError(iris.ErrServerClosed))
