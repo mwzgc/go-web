@@ -1,6 +1,9 @@
 package godis
 
 import (
+	"time"
+
+	"github.com/Unknwon/goconfig"
 	"github.com/go-redis/redis/v7"
 )
 
@@ -11,10 +14,18 @@ func getRedis() *redis.Client {
 		return client
 	}
 
+	cfg, err := goconfig.LoadConfigFile("../../conf.ini")
+	if err != nil {
+		panic(err)
+	}
+
+	address, _ := cfg.GetValue("redis", "address")
+
 	client = redis.NewClient(&redis.Options{
-		Addr:     "127.0.0.1:6379",
-		Password: "", // no password set
-		DB:       0,  // use default DB
+		Addr:       address,
+		Password:   "", // no password set
+		DB:         0,  // use default DB
+		MaxConnAge: 10 * time.Minute,
 	})
 
 	return client

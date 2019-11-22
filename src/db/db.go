@@ -3,11 +3,14 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"strconv"
+	"time"
 
+	"github.com/Unknwon/goconfig"
 	_ "github.com/go-sql-driver/mysql"
 )
 
-const (
+var (
 	USERNAME = "root"
 	PASSWORD = "root"
 	NETWORK  = "tcp"
@@ -19,6 +22,8 @@ const (
 var cacheDb *sql.DB
 
 func init() {
+	getConfig()
+
 	dsn := fmt.Sprintf("%s:%s@%s(%s:%d)/%s", USERNAME, PASSWORD, NETWORK, SERVER, PORT, DATABASE)
 	db, err := sql.Open("mysql", dsn)
 
@@ -27,9 +32,28 @@ func init() {
 
 	}
 
-	db.SetMaxOpenConns(100)
-	db.SetMaxIdleConns(10)
+	db.SetMaxOpenConns(50)
+	// db.SetMaxIdleConns(10)
+	db.SetConnMaxLifetime(10 * time.Minute)
 	cacheDb = db
+}
+
+func getConfig() {
+	cfg, err := goconfig.LoadConfigFile("../../conf.ini")
+	if err != nil {
+		panic(err)
+	}
+
+	username, _ := cfg.GetValue("mysql", "username")
+	password, _ := cfg.GetValue("mysql", "password")
+	server, _ := cfg.GetValue("mysql", "server")
+	port, _ := cfg.GetValue("mysql", "port")
+
+	USERNAME = username
+	PASSWORD = password
+	SERVER = server
+	intPort, _ := strconv.Atoi(port)
+	PORT = intPort
 }
 
 func getDb() *sql.DB {
