@@ -3,10 +3,10 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"go-web/src/config"
 	"strconv"
 	"time"
 
-	"github.com/Unknwon/goconfig"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -39,7 +39,7 @@ func init() {
 }
 
 func getConfig() {
-	cfg, err := goconfig.LoadConfigFile("../../conf.ini")
+	cfg, err := config.GetConfig()
 	if err != nil {
 		panic(err)
 	}

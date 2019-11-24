@@ -1,9 +1,9 @@
 package godis
 
 import (
+	"go-web/src/config"
 	"time"
 
-	"github.com/Unknwon/goconfig"
 	"github.com/go-redis/redis/v7"
 )
 
@@ -14,7 +14,7 @@ func getRedis() *redis.Client {
 		return client
 	}
 
-	cfg, err := goconfig.LoadConfigFile("../../conf.ini")
+	cfg, err := config.GetConfig()
 	if err != nil {
 		panic(err)
 	}

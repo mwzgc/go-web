@@ -1,14 +1,15 @@
 package mq
 
 import (
-	"github.com/Unknwon/goconfig"
+	"go-web/src/config"
+
 	stomp "github.com/go-stomp/stomp"
 )
 
 var address string
 
 func init() {
-	cfg, err := goconfig.LoadConfigFile("../../conf.ini")
+	cfg, err := config.GetConfig()
 	if err != nil {
 		panic(err)
 	}
@@ -17,34 +18,35 @@ func init() {
 	address = value
 }
 
+// ActiveMQ ...
 type ActiveMQ struct {
 	Addr string
 }
 
-//New activeMQ with addr.
+// NewActiveMQ with addr ...
 func NewActiveMQ() *ActiveMQ {
 	return &ActiveMQ{address}
 }
 
-// Used for health check
-func (this *ActiveMQ) Check() error {
-	conn, err := this.Connect()
+// Check ...
+func (mq *ActiveMQ) Check() error {
+	conn, err := mq.Connect()
 	if err == nil {
 		defer conn.Disconnect()
 		return nil
-	} else {
-		return err
 	}
+
+	return err
 }
 
-// Connect to activeMQ
-func (this *ActiveMQ) Connect() (*stomp.Conn, error) {
-	return stomp.Dial("tcp", this.Addr)
+// Connect ...
+func (mq *ActiveMQ) Connect() (*stomp.Conn, error) {
+	return stomp.Dial("tcp", mq.Addr)
 }
 
-// Send msg to destination
-func (this *ActiveMQ) Send(destination string, msg string) error {
-	conn, err := this.Connect()
+// Send ...
+func (mq *ActiveMQ) Send(destination string, msg string) error {
+	conn, err := mq.Connect()
 	if err != nil {
 		panic(err)
 	}
@@ -55,14 +57,13 @@ func (this *ActiveMQ) Send(destination string, msg string) error {
 		[]byte(msg))  // body
 }
 
-// Subscribe Message from destination
-// func handler handle msg reveived from destination
-func (this *ActiveMQ) Subscribe(destination string, handler func(err error, msg string)) error {
-
-	conn, err := this.Connect()
+// Subscribe ...
+func (mq *ActiveMQ) Subscribe(destination string, handler func(err error, msg string)) error {
+	conn, err := mq.Connect()
 	if err != nil {
 		panic(err)
 	}
+
 	sub, err := conn.Subscribe(destination, stomp.AckAuto)
 	if err != nil {
 		return err
@@ -73,5 +74,5 @@ func (this *ActiveMQ) Subscribe(destination string, handler func(err error, msg 
 		m := <-sub.C
 		handler(m.Err, string(m.Body))
 	}
-	return err
+	// return err
 }
